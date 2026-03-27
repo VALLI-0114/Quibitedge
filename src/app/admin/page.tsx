@@ -1,18 +1,16 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import AnimatedBackground from '../../components/AnimatedBackground';
 import GlassCard from '../../components/GlassCard';
 import {
     getAllApplications, updateApplicationStatus, verifyPayment,
-    getApplicationStats,
+    getApplicationStats, updateApplication, deleteApplication,
 } from '../../lib/database';
 import {
     HiUsers, HiClock, HiCheckCircle, HiXCircle, HiSearch,
     HiFilter, HiDownload, HiEye, HiShieldCheck, HiChartBar,
-    HiDocumentDownload, HiLogin, HiCurrencyRupee,
+    HiDocumentDownload, HiLogin, HiCurrencyRupee, HiPencil, HiTrash,
 } from 'react-icons/hi';
 
 interface Application {
@@ -61,6 +59,8 @@ export default function AdminPage() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [domainFilter, setDomainFilter] = useState('all');
     const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+    const [editingApp, setEditingApp] = useState<Application | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'overview' | 'applications' | 'payments'>('overview');
 
     const fetchData = useCallback(async () => {
@@ -116,6 +116,32 @@ export default function AdminPage() {
             toast.error('Failed to update payment');
         }
     };
+    
+    const handleDeleteApplication = async (id: string) => {
+        console.log('AdminPage: Requesting deletion of application ID:', id);
+        try {
+            await deleteApplication(id);
+            console.log('AdminPage: Deletion successful for ID:', id);
+            toast.success('Application deleted successfully');
+            setConfirmDelete(null);
+            if (selectedApp?.id === id) setSelectedApp(null);
+            fetchData();
+        } catch (error) {
+            console.error('AdminPage: Deletion failed for ID:', id, error);
+            toast.error('Failed to delete application');
+        }
+    };
+    
+    const handleUpdateApplication = async (id: string, updatedData: any) => {
+        try {
+            await updateApplication(id, updatedData);
+            toast.success('Application updated successfully');
+            setEditingApp(null);
+            fetchData();
+        } catch {
+            toast.error('Failed to update application');
+        }
+    };
 
     const exportCSV = () => {
         if (!applications.length) {
@@ -144,19 +170,15 @@ export default function AdminPage() {
         toast.success('CSV exported!');
     };
 
-    // Login Screen
     if (!isAuthenticated) {
         return (
-            <div style={{ position: 'relative', minHeight: '100vh' }}>
-                <AnimatedBackground />
+            <div style={{ position: 'relative', minHeight: '100vh', background: '#f8fafc' }}>
                 <div style={{
                     position: 'relative', zIndex: 1,
                     minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     padding: '24px',
                 }}>
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                    <div
                         className="glass-card"
                         style={{ maxWidth: '420px', width: '100%', padding: '40px' }}
                     >
@@ -191,19 +213,17 @@ export default function AdminPage() {
                             className="glass-input"
                             style={{ marginBottom: '16px' }}
                         />
-                        <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                        <button
                             onClick={handleLogin}
                             className="btn-primary"
                             style={{ width: '100%' }}
                         >
                             <HiLogin size={18} /> Sign In
-                        </motion.button>
+                        </button>
                         <p style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'center', marginTop: '16px' }}>
                             Restricted area. Authorized personnel only.
                         </p>
-                    </motion.div>
+                    </div>
                 </div>
             </div>
         );
@@ -218,8 +238,7 @@ export default function AdminPage() {
     ];
 
     return (
-        <div style={{ position: 'relative', minHeight: '100vh' }}>
-            <AnimatedBackground />
+        <div style={{ position: 'relative', minHeight: '100vh', background: '#f1f5f9' }}>
             <div style={{
                 position: 'relative', zIndex: 1,
                 maxWidth: '1400px', margin: '0 auto',
@@ -234,29 +253,32 @@ export default function AdminPage() {
                         <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a' }}>
                             Admin Dashboard
                         </h1>
-                        <p style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                        <p style={{ color: '#64748b', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             QubitEdge Summer Internship 2K26
+                            <span style={{ 
+                                padding: '2px 8px', borderRadius: '4px', background: '#ecfdf5', 
+                                color: '#10b981', fontSize: '0.7rem', fontWeight: 600,
+                                border: '1px solid #10b981'
+                            }}>
+                                ● Database: Connected
+                            </span>
                         </p>
                     </div>
                     <div style={{ display: 'flex', gap: '12px' }}>
-                        <motion.button
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.97 }}
+                        <button
                             onClick={exportCSV}
                             className="btn-secondary"
                             style={{ fontSize: '0.85rem', padding: '10px 18px' }}
                         >
                             <HiDownload size={16} /> Export CSV
-                        </motion.button>
-                        <motion.button
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.97 }}
+                        </button>
+                        <button
                             onClick={fetchData}
                             className="btn-primary"
                             style={{ fontSize: '0.85rem', padding: '10px 18px' }}
                         >
                             Refresh
-                        </motion.button>
+                        </button>
                     </div>
                 </div>
 
@@ -290,11 +312,8 @@ export default function AdminPage() {
                             gap: '16px', marginBottom: '28px',
                         }}>
                             {statCards.map((card, i) => (
-                                <motion.div
+                                <div
                                     key={i}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.08 }}
                                     className="glass-card"
                                     style={{ padding: '20px' }}
                                 >
@@ -311,7 +330,7 @@ export default function AdminPage() {
                                             {card.icon}
                                         </div>
                                     </div>
-                                </motion.div>
+                                </div>
                             ))}
                         </div>
 
@@ -329,11 +348,13 @@ export default function AdminPage() {
                                                 <span style={{ fontSize: '0.85rem', color: '#6366f1', fontWeight: 600 }}>{count}</span>
                                             </div>
                                             <div style={{ height: '8px', background: 'rgba(241,245,249,0.8)', borderRadius: '100px', overflow: 'hidden' }}>
-                                                <motion.div
-                                                    initial={{ width: 0 }}
-                                                    animate={{ width: `${(count / stats.total) * 100}%` }}
-                                                    transition={{ duration: 0.8, delay: 0.3 }}
-                                                    style={{ height: '100%', background: 'linear-gradient(90deg, #6366f1, #a855f7)', borderRadius: '100px' }}
+                                                <div
+                                                    style={{ 
+                                                        height: '100%', 
+                                                        width: `${(count / stats.total) * 100}%`,
+                                                        background: 'linear-gradient(90deg, #6366f1, #a855f7)', 
+                                                        borderRadius: '100px' 
+                                                    }}
                                                 />
                                             </div>
                                         </div>
@@ -411,15 +432,13 @@ export default function AdminPage() {
                                         {domains.map(d => <option key={d} value={d}>{d === 'all' ? 'All Domains' : d}</option>)}
                                     </select>
                                 </div>
-                                <motion.button
-                                    whileHover={{ scale: 1.03 }}
-                                    whileTap={{ scale: 0.97 }}
+                                <button
                                     onClick={fetchData}
                                     className="btn-primary"
                                     style={{ fontSize: '0.85rem', padding: '10px 18px' }}
                                 >
                                     <HiSearch size={16} /> Search
-                                </motion.button>
+                                </button>
                             </div>
                         </GlassCard>
 
@@ -483,13 +502,39 @@ export default function AdminPage() {
                                                                     <div style={{ display: 'flex', gap: '6px' }}>
                                                                         <button
                                                                             onClick={() => setSelectedApp(app)}
+                                                                            title="View Details"
                                                                             style={{
                                                                                 padding: '5px 10px', borderRadius: '6px',
                                                                                 background: 'rgba(99,102,241,0.08)', border: 'none',
                                                                                 color: '#6366f1', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600,
+                                                                                display: 'flex', alignItems: 'center', gap: '4px'
                                                                             }}
                                                                         >
-                                                                            View
+                                                                            <HiEye size={14} /> View
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => setEditingApp(app)}
+                                                                            title="Edit Application"
+                                                                            style={{
+                                                                                padding: '5px 10px', borderRadius: '6px',
+                                                                                background: 'rgba(59,130,246,0.08)', border: 'none',
+                                                                                color: '#3b82f6', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600,
+                                                                                display: 'flex', alignItems: 'center', gap: '4px'
+                                                                            }}
+                                                                        >
+                                                                            <HiPencil size={14} /> Edit
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => setConfirmDelete(app.id)}
+                                                                            title="Delete Application"
+                                                                            style={{
+                                                                                padding: '5px 10px', borderRadius: '6px',
+                                                                                background: 'rgba(239,68,68,0.08)', border: 'none',
+                                                                                color: '#ef4444', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600,
+                                                                                display: 'flex', alignItems: 'center', gap: '4px'
+                                                                            }}
+                                                                        >
+                                                                            <HiTrash size={14} /> Delete
                                                                         </button>
                                                                         {app.status !== 'approved' && (
                                                                             <button
@@ -514,21 +559,6 @@ export default function AdminPage() {
                                                                             >
                                                                                 Reject
                                                                             </button>
-                                                                        )}
-                                                                        {app.projects?.[0]?.resume_url && (
-                                                                            <a
-                                                                                href={app.projects[0].resume_url}
-                                                                                target="_blank"
-                                                                                rel="noopener noreferrer"
-                                                                                style={{
-                                                                                    padding: '5px 10px', borderRadius: '6px',
-                                                                                    background: 'rgba(59,130,246,0.08)', border: 'none',
-                                                                                    color: '#3b82f6', textDecoration: 'none', fontSize: '0.75rem', fontWeight: 600,
-                                                                                    display: 'flex', alignItems: 'center', gap: '2px',
-                                                                                }}
-                                                                            >
-                                                                                <HiDocumentDownload size={12} /> Resume
-                                                                            </a>
                                                                         )}
                                                                     </div>
                                                                 </td>
@@ -578,6 +608,20 @@ export default function AdminPage() {
                                                 </p>
                                             </div>
                                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                <button
+                                                    onClick={() => setEditingApp(app)}
+                                                    title="Edit"
+                                                    style={{ background: 'none', border: 'none', color: '#6366f1', cursor: 'pointer', padding: '4px' }}
+                                                >
+                                                    <HiPencil size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={() => setConfirmDelete(app.id)}
+                                                    title="Delete"
+                                                    style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
+                                                >
+                                                    <HiTrash size={18} />
+                                                </button>
                                                 <span className={`badge badge-${payment.payment_status}`}>
                                                     {payment.payment_status}
                                                 </span>
@@ -629,9 +673,7 @@ export default function AdminPage() {
                             padding: '24px',
                         }}
                     >
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
+                        <div
                             onClick={(e) => e.stopPropagation()}
                             className="glass-card"
                             style={{
@@ -729,8 +771,172 @@ export default function AdminPage() {
                                 >
                                     <HiXCircle /> Reject
                                 </button>
+                                <button
+                                    onClick={() => setConfirmDelete(selectedApp.id)}
+                                    className="btn-secondary"
+                                    style={{ flex: 1, color: '#ef4444', borderColor: '#ef4444' }}
+                                >
+                                    <HiTrash /> Delete
+                                </button>
                             </div>
-                        </motion.div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Edit Application Modal */}
+                {editingApp && (
+                    <div
+                        onClick={() => setEditingApp(null)}
+                        style={{
+                            position: 'fixed', inset: 0, zIndex: 2000,
+                            background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            padding: '24px',
+                        }}
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="glass-card"
+                            style={{
+                                maxWidth: '600px', width: '100%', padding: '32px',
+                                maxHeight: '80vh', overflowY: 'auto',
+                                background: 'rgba(255,255,255,0.95)',
+                            }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a' }}>
+                                    Edit Application
+                                </h3>
+                                <button
+                                    onClick={() => setEditingApp(null)}
+                                    style={{
+                                        background: 'rgba(239,68,68,0.08)', border: 'none',
+                                        borderRadius: '8px', padding: '6px 12px', cursor: 'pointer',
+                                        color: '#ef4444', fontWeight: 600, fontSize: '0.8rem',
+                                    }}
+                                >
+                                    ✕ Cancel
+                                </button>
+                            </div>
+
+                            <div style={{ display: 'grid', gap: '16px' }}>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '4px', display: 'block' }}>Full Name</label>
+                                    <input
+                                        type="text"
+                                        value={editingApp.full_name}
+                                        onChange={(e) => setEditingApp({ ...editingApp, full_name: e.target.value })}
+                                        className="glass-input"
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '4px', display: 'block' }}>Email</label>
+                                    <input
+                                        type="email"
+                                        value={editingApp.email}
+                                        onChange={(e) => setEditingApp({ ...editingApp, email: e.target.value })}
+                                        className="glass-input"
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '4px', display: 'block' }}>Phone</label>
+                                    <input
+                                        type="text"
+                                        value={editingApp.phone}
+                                        onChange={(e) => setEditingApp({ ...editingApp, phone: e.target.value })}
+                                        className="glass-input"
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '4px', display: 'block' }}>Status</label>
+                                    <select
+                                        value={editingApp.status}
+                                        onChange={(e) => setEditingApp({ ...editingApp, status: e.target.value })}
+                                        className="glass-input"
+                                    >
+                                        <option value="pending">Pending</option>
+                                        <option value="under_review">Under Review</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="rejected">Rejected</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
+                                <button
+                                    onClick={() => handleUpdateApplication(editingApp.id, {
+                                        full_name: editingApp.full_name,
+                                        email: editingApp.email,
+                                        phone: editingApp.phone,
+                                        status: editingApp.status,
+                                    })}
+                                    className="btn-primary"
+                                    style={{ flex: 1 }}
+                                >
+                                    Save Changes
+                                </button>
+                                <button
+                                    onClick={() => setEditingApp(null)}
+                                    className="btn-secondary"
+                                    style={{ flex: 1 }}
+                                >
+                                    Discard
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Delete Confirmation Modal */}
+                {confirmDelete && (
+                    <div
+                        onClick={() => setConfirmDelete(null)}
+                        style={{
+                            position: 'fixed', inset: 0, zIndex: 3000,
+                            background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            padding: '24px',
+                        }}
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="glass-card"
+                            style={{
+                                maxWidth: '400px', width: '100%', padding: '32px',
+                                background: 'white', textAlign: 'center',
+                            }}
+                        >
+                            <div style={{
+                                width: '60px', height: '60px', borderRadius: '50%',
+                                background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                margin: '0 auto 20px',
+                            }}>
+                                <HiTrash size={30} />
+                            </div>
+                            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>
+                                Delete Application?
+                            </h3>
+                            <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '24px' }}>
+                                This action cannot be undone. All application data will be permanently removed.
+                            </p>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button
+                                    onClick={() => handleDeleteApplication(confirmDelete)}
+                                    className="btn-primary"
+                                    style={{ flex: 1, background: '#ef4444' }}
+                                >
+                                    Yes, Delete
+                                </button>
+                                <button
+                                    onClick={() => setConfirmDelete(null)}
+                                    className="btn-secondary"
+                                    style={{ flex: 1 }}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

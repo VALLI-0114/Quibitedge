@@ -233,20 +233,25 @@ export async function getAllApplications(filters?: {
 // ========== ADMIN: UPDATE APPLICATION STATUS ==========
 
 export async function updateApplicationStatus(id: string, status: string) {
+  console.log(`Database: Updating application ${id} status to ${status}`);
   const { data, error } = await supabase
     .from("applications")
     .update({ status })
     .eq("id", id)
     .select()
-    .single()
 
-  if (error) throw error
-  return data
+  if (error) {
+    console.error(`Database Error: Failed to update application ${id}:`, error);
+    throw error;
+  }
+  console.log(`Database: Successfully updated application ${id}`);
+  return data?.[0] || null;
 }
 
 // ========== ADMIN: VERIFY PAYMENT ==========
 
 export async function verifyPayment(applicationId: string, status: string) {
+  console.log(`Database: Verifying payment for application ${applicationId} as ${status}`);
   const { data, error } = await supabase
     .from("payments")
     .update({
@@ -255,10 +260,19 @@ export async function verifyPayment(applicationId: string, status: string) {
     })
     .eq("application_id", applicationId)
     .select()
-    .single()
 
-  if (error) throw error
-  return data
+  if (error) {
+    console.error(`Database Error: Failed to verify payment for ${applicationId}:`, error);
+    throw error;
+  }
+  
+  if (!data || data.length === 0) {
+    console.warn(`Database Warning: No payment records found for application ${applicationId}`);
+  } else {
+    console.log(`Database: Successfully updated ${data.length} payment record(s) for ${applicationId}`);
+  }
+  
+  return data?.[0] || null;
 }
 
 // ========== ADMIN: GET APPLICATION STATS ==========
@@ -291,3 +305,18 @@ export async function getApplicationStats() {
   return stats
 }
 
+// ========== ADMIN: DELETE APPLICATION ==========
+
+export async function deleteApplication(id: string) {
+  console.log('Attempting to delete application with ID:', id);
+  const { error } = await supabase
+    .from("applications")
+    .delete()
+    .eq("id", id)
+
+  if (error) {
+    console.error('Delete error for ID:', id, error);
+    throw error;
+  }
+  console.log('Successfully deleted application with ID:', id);
+}

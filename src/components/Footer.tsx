@@ -57,6 +57,7 @@ export default function Footer() {
                             { name: 'Internships', href: '/internship' },
                             { name: 'Register', href: '/register' },
                             { name: 'Track Status', href: '/status' },
+                            { name: 'Admin', href: '/admin' },
                         ].map((link) => (
                             <Link key={link.name} href={link.href} style={{
                                 display: 'block', padding: '6px 0', color: '#64748b',

@@ -56,7 +56,7 @@ export default function Step5Payment({ data, onChange, errors, files, previews, 
                     </div>
                     <div>
                         <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '4px' }}>Internship Registration Fee</p>
-                        <p style={{ fontSize: '2rem', fontWeight: 800, color: '#0f172a', textShadow: '0 0 15px rgba(139, 92, 246, 0.5)' }}>₹999</p>
+                        <p style={{ fontSize: '2rem', fontWeight: 800, color: '#0f172a', textShadow: '0 0 15px rgba(139, 92, 246, 0.5)' }}>₹2000</p>
                         <p style={{ fontSize: '0.75rem', color: '#64748b' }}>One-time payment • Includes certificate</p>
                     </div>
                 </div>
@@ -67,25 +67,28 @@ export default function Step5Payment({ data, onChange, errors, files, previews, 
                 <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#334155', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <HiQrcode size={20} style={{ color: '#6366f1' }} /> Scan QR Code to Pay
                 </h3>
-                <div className="qr-container" style={{ maxWidth: '300px', margin: '0 auto' }}>
+                <div className="qr-container" style={{ maxWidth: '300px', margin: '0 auto', textAlign: 'center' }}>
                     <div style={{
-                        width: '200px', height: '200px',
-                        background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
+                        width: '240px', height: '240px',
+                        background: 'white',
                         borderRadius: '12px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        flexDirection: 'column', gap: '12px',
-                        border: '2px dashed #e2e8f0',
+                        margin: '0 auto 16px',
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
+                        border: '1px solid #e2e8f0',
+                        overflow: 'hidden'
                     }}>
-                        <HiQrcode size={60} style={{ color: '#64748b' }} />
-                        <span style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'center' }}>
-                            QR Code will be<br />generated here
-                        </span>
+                        <img 
+                            src="/qr-code.png" 
+                            alt="Payment QR Code" 
+                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                        />
                     </div>
-                    <p style={{ fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 500 }}>
-                        UPI ID: <span style={{ color: '#38bdf8' }}>qubitedge@upi</span>
+                    <p style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600, marginBottom: '4px' }}>
+                        UPI ID: <span style={{ color: '#0ea5e9' }}>eazypay.1IGYN5S2B7@icici</span>
                     </p>
                     <p style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                        Scan & pay ₹999 using any UPI app
+                        Scan & pay ₹2000 using any UPI app
                     </p>
                 </div>
             </GlassCard>
@@ -95,7 +98,7 @@ export default function Step5Payment({ data, onChange, errors, files, previews, 
                     Payment Information
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '0 20px' }}>
-                    <FormInput label="Fee Amount" name="fee_amount" value={data.fee_amount || '999'} onChange={handleChange} disabled placeholder="999" />
+                    <FormInput label="Fee Amount" name="fee_amount" value={data.fee_amount || '2000'} onChange={handleChange} disabled placeholder="2000" />
                     <FormInput label="Payment Date" name="payment_date" type="date" value={data.payment_date || ''} onChange={handleChange} required error={errors.payment_date} />
                     <FormInput label="Transaction ID" name="transaction_id" value={data.transaction_id || ''} onChange={handleChange} required error={errors.transaction_id} placeholder="Enter transaction/reference ID" />
                     <FormInput label="UPI ID Used" name="upi_id" value={data.upi_id || ''} onChange={handleChange} placeholder="yourname@upi" />

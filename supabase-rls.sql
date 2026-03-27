@@ -31,4 +31,13 @@ CREATE POLICY "Allow public read related records" ON payments FOR SELECT TO anon
 CREATE POLICY "Allow public update related records" ON payments FOR UPDATE TO anon USING (true);
 
 CREATE POLICY "Allow public read related records" ON documents FOR SELECT TO anon USING (true);
+-- Allow public update related records
 CREATE POLICY "Allow public update related records" ON documents FOR UPDATE TO anon USING (true);
+CREATE POLICY "Allow public delete related records" ON documents FOR DELETE TO anon USING (true);
+
+-- Allow deletion for all other tables
+CREATE POLICY "Allow public delete by app_id" ON applications FOR DELETE TO anon USING (true);
+CREATE POLICY "Allow public delete related records" ON academic_details FOR DELETE TO anon USING (true);
+CREATE POLICY "Allow public delete related records" ON internship_preferences FOR DELETE TO anon USING (true);
+CREATE POLICY "Allow public delete related records" ON projects FOR DELETE TO anon USING (true);
+CREATE POLICY "Allow public delete related records" ON payments FOR DELETE TO anon USING (true);

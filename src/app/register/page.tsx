@@ -30,7 +30,7 @@ export default function RegisterPage() {
     const [academicData, setAcademicData] = useState<Record<string, string | string[]>>({});
     const [preferencesData, setPreferencesData] = useState<Record<string, string>>({});
     const [projectsData, setProjectsData] = useState<Record<string, string | string[]>>({});
-    const [paymentData, setPaymentData] = useState<Record<string, string>>({ fee_amount: '999' });
+    const [paymentData, setPaymentData] = useState<Record<string, string>>({ fee_amount: '2000' });
 
     const [files, setFiles] = useState<Record<string, File | null>>({});
     const [previews, setPreviews] = useState<Record<string, string>>({});

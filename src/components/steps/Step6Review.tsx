@@ -70,7 +70,7 @@ function Field({ label, value }: { label: string; value: string | undefined }) {
     return (
         <div style={{ marginBottom: '8px' }}>
             <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>{label}</span>
-            <p style={{ fontSize: '0.9rem', color: '#f1f5f9', fontWeight: 400 }}>{value}</p>
+            <p style={{ fontSize: '0.9rem', color: '#1e293b', fontWeight: 500 }}>{value}</p>
         </div>
     );
 }
@@ -102,16 +102,27 @@ export default function Step6Review({ formData, declaration, onDeclarationChange
                             style={{ width: '80px', height: '80px', borderRadius: '14px', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.5)' }}
                         />
                     )}
-                    <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0 20px' }}>
-                        <Field label="Full Name" value={personal.full_name} />
-                        <Field label="Email" value={personal.email} />
-                        <Field label="Phone" value={personal.phone} />
-                        <Field label="Gender" value={personal.gender} />
-                        <Field label="Date of Birth" value={personal.date_of_birth} />
-                        <Field label="City" value={personal.city} />
-                        <Field label="State" value={personal.state} />
-                        <Field label="LinkedIn" value={personal.linkedin} />
-                        <Field label="GitHub" value={personal.github} />
+                    <div style={{ flex: 1, minWidth: '300px', overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                            <tbody>
+                                {[
+                                    ['Full Name', personal.full_name],
+                                    ['Email', personal.email],
+                                    ['Phone', personal.phone],
+                                    ['Gender', personal.gender],
+                                    ['Date of Birth', personal.date_of_birth],
+                                    ['City', personal.city],
+                                    ['State', personal.state],
+                                    ['LinkedIn', personal.linkedin],
+                                    ['GitHub', personal.github],
+                                ].map(([label, value]) => value ? (
+                                    <tr key={label as string} style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+                                        <td style={{ padding: '10px 0', color: '#64748b', fontWeight: 500, width: '140px' }}>{label as string}</td>
+                                        <td style={{ padding: '10px 0', color: '#1e293b', fontWeight: 600 }}>{value as string}</td>
+                                    </tr>
+                                ) : null)}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </ReviewSection>
@@ -156,12 +167,13 @@ export default function Step6Review({ formData, declaration, onDeclarationChange
                     title && (
                         <div key={i} style={{
                             padding: '12px 16px', borderRadius: '10px',
-                            background: 'rgba(15,23,42,0.8)', marginBottom: '10px',
-                            border: '1px solid rgba(255,255,255,0.05)'
+                            background: 'rgba(255, 255, 255, 0.4)', marginBottom: '10px',
+                            border: '1px solid rgba(255,255,255,0.5)',
+                            backdropFilter: 'blur(4px)'
                         }}>
                             <p style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.9rem' }}>{title}</p>
                             {((projects.project_descriptions as string[]) || [])[i] && (
-                                <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>
+                                <p style={{ fontSize: '0.8rem', color: '#475569', marginTop: '4px' }}>
                                     {((projects.project_descriptions as string[]) || [])[i]}
                                 </p>
                             )}
@@ -173,7 +185,7 @@ export default function Step6Review({ formData, declaration, onDeclarationChange
             {/* Payment */}
             <ReviewSection title="Payment Details" icon={<HiCurrencyRupee size={18} />} step={5} onEdit={onEditStep}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0 20px' }}>
-                    <Field label="Amount" value={`₹${payment.fee_amount || '999'}`} />
+                    <Field label="Amount" value={`₹${payment.fee_amount || '2000'}`} />
                     <Field label="Transaction ID" value={payment.transaction_id} />
                     <Field label="Payment Method" value={payment.payment_method} />
                     <Field label="Payment Date" value={payment.payment_date} />
